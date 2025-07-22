@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mini Pomodoro</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="pomodoroView">
+    <div class="top-bar">
+      <div class="menu">
+        <span class="bar" data-time="15">15</span>
+        <span class="bar" data-time="25">25</span>
+        <span class="bar" data-time="45">45</span>
+      </div>
+    </div>
+    <div id="quote">Focus and finish strong 💪</div>
+    <div id="timer">00:00</div>
+    <div class="controls">
+      <button id="startBtn">Start</button>
+      <button id="pauseBtn">Pause</button>
+    </div>
+    <div class="toggle-history">
+      <button id="showHistoryBtn">📖 Mostrar historial</button>
+    </div>
+  </div>
+  <audio id="backgroundMusic" src="Music.mp3" loop></audio>
+  <audio id="bellSound" src="bell.mp3"></audio>
+  <div id="history" style="display: none;">
+    <h4>Pomodoros completados: <span id="count">0</span></h4>
+    <ul id="list"></ul>
+    <button id="closeHistoryBtn">❌ Cerrar historial</button>
+  </div>
+  <div class="music-toggle">
+  <label>
+    <input type="checkbox" id="musicToggle" checked>
+    🎵 Activar música
+  </label>
+</div>
+  
+  <script src="script.js"></script>
+</body>
+</html>
