@@ -8,37 +8,83 @@
 </head>
 <body>
   <div id="pomodoroView">
-    <div class="top-bar">
+      <img src="logo.png" style="position: absolute; top: 10px; right: 10px; width: 80px;">
+      <div class="top-bar">
       <div class="menu">
         <span class="bar" data-time="15">15</span>
         <span class="bar" data-time="25">25</span>
         <span class="bar" data-time="45">45</span>
       </div>
     </div>
+    
     <div id="quote">Focus and finish strong 💪</div>
     <div id="timer">00:00</div>
+    <div class="input-container">
+      <input type="text" id="subjectInput" placeholder="Inserte ramo...">
+    </div>
+
     <div class="controls">
       <button id="startBtn">Start</button>
       <button id="pauseBtn">Pause</button>
     </div>
+
     <div class="toggle-history">
       <button id="showHistoryBtn">📖 Mostrar historial</button>
+      <button onclick="mostrarMetas()">🎯 Metas semanales</button>   
     </div>
+
+    <!-- ✅ Mueve esto AQUÍ -->
+    <div class="music-toggle">
+      <span>Play music</span>
+      <label class="switch">
+        <input type="checkbox" id="musicToggle" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="focus-detection-toggle">
+      <label>
+        <input type="checkbox" id="deteccionToggle" />
+        Detección de concentración 🧠
+      </label>
+    </div>
+
+    <!-- Cámara oculta -->
+    <video id="videoInput" autoplay muted playsinline style="display: none;"></video>
+
+    <!-- 👆 FIN -->
+
   </div>
+
+  <!-- Audios van fuera como ya lo tienes -->
   <audio id="backgroundMusic" src="Music.mp3" loop></audio>
   <audio id="bellSound" src="bell.mp3"></audio>
+
   <div id="history" style="display: none;">
     <h4>Pomodoros completados: <span id="count">0</span></h4>
     <ul id="list"></ul>
     <button id="closeHistoryBtn">❌ Cerrar historial</button>
   </div>
-  <div class="music-toggle">
-  <label>
-    <input type="checkbox" id="musicToggle" checked>
-    🎵 Activar música
-  </label>
-</div>
-  
+
+  <!-- Sección de metas (oculta al inicio) -->
+  <div id="metas-container" style="display: none;">
+    <h3>Establece tus metas semanales</h3>
+    <div>
+      <input type="text" placeholder="Nombre del ramo" id="nuevoRamo" />
+      <input type="number" placeholder="Pomodoros meta" id="metaCantidad" />
+      <button onclick="agregarMeta()">Agregar</button>
+    </div>
+    <ul id="listaMetas"></ul>
+    <button onclick="volverAlPomodoro()">⬅ Volver</button>
+  </div>
+
+  <!-- Detección de rostro (MediaPipe + Cámara) -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/face_detection.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.min.js"></script>
+
   <script src="script.js"></script>
+
 </body>
+
+
 </html>
