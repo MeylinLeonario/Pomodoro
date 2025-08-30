@@ -104,13 +104,14 @@
 
 /* Fondo general */
 body {
-    background: var(--soft-pink);
-  color: var(--harvard-crimson);    /* vino tinto estilo Harvard */
-  height: 100vh;
+  background: var(--soft-pink);
+  color: var(--harvard-crimson);
+  min-height: 100vh;
   display: flex;
   justify-content: center;
-  align-items: center;
-  overflow: hidden;
+  align-items: flex-start; /* antes estaba center */
+  overflow-y: auto;        /* antes estaba hidden */
+  padding: 20px;           /* espacio para respirar */
 }
 
 /* Contenedor principal */
@@ -333,4 +334,112 @@ button:hover {
 
 #logo:hover {
   transform: scale(1.1);
+}
+
+#listaTareas li {
+  margin: 5px 0;
+  list-style: none;
+}
+
+#listaTareas li.completada {
+  text-decoration: line-through;
+  color: gray;
+}
+
+.subjects-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 6px 0 10px;
+  max-height: 92px; 
+  overflow-y: auto;
+}
+
+.subject-chip {
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(0,0,0,.15);
+  cursor: pointer;
+  user-select: none;
+  font-size: 12px;
+  line-height: 1;
+  background: #fff;
+}
+
+.subject-chip:hover { filter: brightness(0.98); }
+
+.subject-chip.active {
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 2px rgba(79,70,229,.15);
+  font-weight: 600;
+}
+
+#listaRamos li {
+  padding: 6px 10px;
+  margin-bottom: 5px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+#listaRamos li.active {
+  border-color: #4f46e5;
+  font-weight: bold;
+  background: #f0f0ff;
+}
+
+.hidden { display: none !important; }
+
+.current-subject{
+  display:flex; align-items:center; gap:8px; justify-content:center;
+  margin:8px 0 12px;
+}
+.current-subject .label{ opacity:.8; font-size:14px; }
+.subject-pill{
+  padding:6px 10px; border-radius:999px; background:#fff;
+  border:1px solid #e2d0d6; font-weight:600; font-size:14px;
+}
+.tiny-link{
+  border:none; background:transparent; text-decoration:underline;
+  cursor:pointer; font-size:12px; opacity:.8;
+}
+
+#ramos-container {
+  background: rgba(255, 240, 246, 0.95);
+  border: 2px solid #dba6b3;
+  border-radius: 18px;
+  padding: 2rem;
+  box-shadow: 0 0 20px rgba(204, 145, 166, 0.2);
+  max-width: 340px;
+  width: 90%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.btn-eliminar {
+  background-color: #ff4d6d;
+  border: none;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.btn-eliminar:hover {
+  background-color: #cc3b55;
+}
+
+#listaRamos li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 12px; /* más espacio interno */
+}
+
+.btn-eliminar {
+  margin-left: 10px;  /* separa la X del texto */
+  padding: 4px 8px;   /* más compacto */
+  font-size: 0.9rem;
 }

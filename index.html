@@ -19,6 +19,11 @@
     
     <div id="quote">Focus and finish strong 💪</div>
     <div id="timer">00:00</div>
+    <div id="currentSubjectBox" class="current-subject hidden">
+      <span class="label">Ramo:</span>
+      <span id="currentSubject" class="subject-pill">—</span>
+      <button class="tiny-link" onclick="mostrarRamos()">Cambiar</button>
+    </div>
     <div class="input-container">
       <input type="text" id="subjectInput" placeholder="Inserte ramo...">
     </div>
@@ -30,7 +35,9 @@
 
     <div class="toggle-history">
       <button id="showHistoryBtn">📖 Mostrar historial</button>
-      <button onclick="mostrarMetas()">🎯 Metas semanales</button>   
+      <button onclick="mostrarMetas()">🎯 Metas semanales</button>
+      <button onclick="mostrarTareas()">📝 Ver tareas</button>
+      <button onclick="mostrarRamos()">📚 Ramos</button> 
     </div>
 
     <!-- ✅ Mueve esto AQUÍ -->
@@ -77,10 +84,27 @@
     <ul id="listaMetas"></ul>
     <button onclick="volverAlPomodoro()">⬅ Volver</button>
   </div>
+<!-- Sección de tareas (oculta al inicio) -->
+  <div id="tareas-container" style="display: none;">
+    <h3>📝 Lista de tareas</h3>
+    <input type="text" id="nuevaTarea" placeholder="Escribe tu tarea" />
+    <button onclick="agregarTarea()">Agregar</button>
+    <ul id="listaTareas"></ul>
+    <button onclick="volverAlPomodoro()">⬅ Volver</button>
+  </div>
+
+  <div id="ramos-container" class="view hidden">
+    <h3>📚 Lista de Ramos</h3>
+    <input type="text" id="nuevoRamoInput" placeholder="Escribe un ramo" />
+    <button onclick="agregarRamo()">Agregar</button>
+    <ul id="listaRamos"></ul>
+    <button onclick="volverAlPomodoro()">⬅ Volver</button>
+  </div>
 
   <!-- Detección de rostro (MediaPipe + Cámara) -->
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/face_detection.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.min.js"></script>
+  
 
   <script src="script.js"></script>
 

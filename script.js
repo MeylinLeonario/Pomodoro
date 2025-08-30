@@ -19,6 +19,8 @@ closeHistoryBtn.addEventListener("click", () => {
   pomodoroView.style.display = "block";
 });
 
+if (!bell) console.warn("No se encontró #bellSound. ¿ID correcto y script con defer?");
+
 
 const quotes = [
   "Focus and finish strong.",
@@ -125,7 +127,9 @@ function registerCompletion(durationMinutes) {
     timeZone: "America/Santiago"
   });
 
-  const subject = document.getElementById("subjectInput").value.trim() || "Sin ramo";
+  const subject = (activeRamo && ramos.includes(activeRamo))
+    ? activeRamo
+    : (document.getElementById("subjectInput")?.value.trim() || "Sin ramo");
   const entry = `${durationMinutes} min – ${time} – ${subject}`;
 
   if (!dailyHistory[dateKey]) {
@@ -190,6 +194,10 @@ function mostrarMetas() {
 function volverAlPomodoro() {
   document.getElementById("pomodoroView").style.display = "block";
   document.getElementById("metas-container").style.display = "none";
+  document.getElementById("history").style.display = "none";
+  document.getElementById("tareas-container").style.display = "none";
+  document.getElementById("ramos-container").style.display = "none";
+
 }
 
 function agregarMeta() {
@@ -198,25 +206,40 @@ function agregarMeta() {
   if (!ramo || isNaN(cantidad)) return;
 
   const metas = JSON.parse(localStorage.getItem("metasSemanales") || "{}");
+  const metasStart = JSON.parse(localStorage.getItem("metasStart") || "{}");
+
   metas[ramo] = cantidad;
+  metasStart[ramo] = new Date().toISOString().slice(0,10); // 👈 reinicia progreso desde hoy
+
   localStorage.setItem("metasSemanales", JSON.stringify(metas));
+  localStorage.setItem("metasStart", JSON.stringify(metasStart));
 
   document.getElementById("nuevoRamo").value = "";
   document.getElementById("metaCantidad").value = "";
   cargarMetas();
 }
 
+
 function calcularProgreso() {
   const metas = JSON.parse(localStorage.getItem("metasSemanales") || "{}");
+  const metasStart = JSON.parse(localStorage.getItem("metasStart") || "{}");
   const historial = JSON.parse(localStorage.getItem("historialPomodoros") || "{}");
 
-  const progreso = {};
-  for (const fecha in historial) {
-    historial[fecha].forEach(ramo => {
-      progreso[ramo] = (progreso[ramo] || 0) + 1;
+  const progreso = {}; // conteo por ramo
+
+  for (const fecha of Object.keys(historial)) {
+    const listaRamosEseDia = historial[fecha];
+
+    listaRamosEseDia.forEach(ramo => {
+      // Si hay fecha de inicio, solo cuenta si la fecha >= inicio
+      const inicio = metasStart[ramo];
+      if (!inicio || fecha >= inicio) {
+        progreso[ramo] = (progreso[ramo] || 0) + 1;
+      }
     });
   }
 
+  // Arma el resumen contra metas actuales
   const resumen = {};
   for (const ramo in metas) {
     resumen[ramo] = {
@@ -225,9 +248,9 @@ function calcularProgreso() {
       completado: (progreso[ramo] || 0) >= metas[ramo]
     };
   }
-
   return resumen;
 }
+
 
 function cargarMetas() {
   const metas = JSON.parse(localStorage.getItem("metasSemanales") || "{}");
@@ -239,17 +262,33 @@ function cargarMetas() {
     const hecho = progreso[ramo]?.hecho || 0;
     const meta = metas[ramo];
     const completado = hecho >= meta;
-    const porcentaje = Math.min(Math.round((hecho / meta) * 100), 100);
 
-    const li = document.createElement("li");
-    li.innerHTML = `
-      <strong>${ramo}</strong>: ${hecho} / ${meta} Pomodoros
+    const metaDiv = document.createElement("div");
+    metaDiv.innerHTML = `
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span><strong>${ramo}</strong>: ${hecho} / ${meta} Pomodoros</span>
+        <button class="btn-eliminar">❌</button>
+      </div>
       <progress value="${hecho}" max="${meta}"></progress>
       ${completado ? "✅ ¡Meta cumplida!" : ""}
     `;
-    lista.appendChild(li);
+
+    // Evento para borrar la meta
+    metaDiv.querySelector(".btn-eliminar").addEventListener("click", () => {
+    const metas = JSON.parse(localStorage.getItem("metasSemanales") || "{}");
+    const metasStart = JSON.parse(localStorage.getItem("metasStart") || "{}");
+    delete metas[ramo];
+    delete metasStart[ramo];
+    localStorage.setItem("metasSemanales", JSON.stringify(metas));
+    localStorage.setItem("metasStart", JSON.stringify(metasStart));
+    cargarMetas();
+  });
+
+
+    lista.appendChild(metaDiv);
   }
 }
+
 
 function guardarPomodoro(ramo) {
   const historial = JSON.parse(localStorage.getItem("historialPomodoros") || "{}");
@@ -334,3 +373,222 @@ deteccionToggle.addEventListener("change", async () => {
     videoElement.srcObject = null;
   }
 });
+
+function mostrarTareas() {
+  document.getElementById("pomodoroView").style.display = "none";
+  document.getElementById("metas-container").style.display = "none";
+  document.getElementById("history").style.display = "none";
+  document.getElementById("tareas-container").style.display = "block";
+  renderTareas();
+}
+
+let tareas = JSON.parse(localStorage.getItem("tareasPomodoro") || "[]");
+
+function renderTareas() {
+  const lista = document.getElementById("listaTareas");
+  lista.innerHTML = "";
+
+  tareas.forEach((tarea, i) => {
+    const li = document.createElement("li");
+    li.textContent = tarea.texto;
+    li.className = tarea.completada ? "completada" : "";
+    li.onclick = () => toggleTarea(i);
+
+    const eliminarBtn = document.createElement("button");
+    eliminarBtn.textContent = "❌";
+    eliminarBtn.style.marginLeft = "10px";
+    eliminarBtn.onclick = (e) => {
+      e.stopPropagation();
+      eliminarTarea(i);
+    };
+
+    li.appendChild(eliminarBtn);
+    lista.appendChild(li);
+  });
+}
+
+function agregarTarea() {
+  const input = document.getElementById("nuevaTarea");
+  const texto = input.value.trim();
+  if (!texto) return;
+
+  tareas.push({ texto, completada: false });
+  input.value = "";
+  guardarTareas();
+  renderTareas();
+}
+
+function toggleTarea(i) {
+  tareas[i].completada = !tareas[i].completada;
+  guardarTareas();
+  renderTareas();
+}
+
+function eliminarTarea(i) {
+  tareas.splice(i, 1);
+  guardarTareas();
+  renderTareas();
+}
+
+function guardarTareas() {
+  localStorage.setItem("tareasPomodoro", JSON.stringify(tareas));
+}
+
+const RAMOS_KEY = "pomodoroSubjects";
+const ACTIVE_RAMOS_KEY = "activeSubject";
+
+let ramos = JSON.parse(localStorage.getItem(RAMOS_KEY) || "[]");
+let activeRamo = localStorage.getItem(ACTIVE_RAMOS_KEY) || "";
+
+// Mostrar ventana de ramos
+function mostrarRamos() {
+  document.getElementById("pomodoroView").style.display = "none";
+  document.getElementById("history").style.display = "none";
+  document.getElementById("metas-container").style.display = "none";
+  document.getElementById("tareas-container").style.display = "none";
+  
+  const ramosView = document.getElementById("ramos-container");
+  ramosView.classList.remove("hidden"); // 👈 quita el display:none
+  ramosView.style.display = "flex";     // 👈 asegura que se muestre
+  
+  renderRamos();
+}
+
+
+function agregarRamo() {
+  const input = document.getElementById("nuevoRamoInput");
+  const nombre = input.value.trim();
+  if (!nombre) return;
+  if (!ramos.includes(nombre)) {
+    ramos.push(nombre);
+    guardarRamos();
+  }
+  input.value = "";
+  renderRamos();
+}
+
+function renderRamos() {
+  const lista = document.getElementById("listaRamos");
+  lista.innerHTML = "";
+  ramos.forEach(ramo => {
+    const li = document.createElement("li");
+    li.textContent = ramo;
+    if (ramo === activeRamo) li.classList.add("active");
+
+    // Al hacer clic, se selecciona como activo
+    li.onclick = () => {
+      activeRamo = ramo;
+      localStorage.setItem(ACTIVE_RAMOS_KEY, ramo);
+      renderRamos();
+      onRamoChanged(); 
+    };
+
+    // Botón de eliminar
+    const eliminar = document.createElement("button");
+    eliminar.textContent = "❌";
+    eliminar.style.float = "right";
+    eliminar.onclick = (e) => {
+      e.stopPropagation();
+      ramos = ramos.filter(r => r !== ramo);
+      guardarRamos();
+      if (activeRamo === ramo) {
+        activeRamo = "";
+        localStorage.removeItem(ACTIVE_RAMOS_KEY);
+      }
+      renderRamos();
+      onRamoChanged(); 
+    };
+
+    li.appendChild(eliminar);
+    lista.appendChild(li);
+  });
+}
+
+function guardarRamos() {
+  localStorage.setItem(RAMOS_KEY, JSON.stringify(ramos));
+}
+
+
+// ===== Mostrar solo el ramo ACTIVO en el pomodoro =====
+function getDisplayedSubject() {
+  // Prioridad: activeRamo (desde la ventana Ramos) -> texto del input -> nada
+  const inputFallback = document.getElementById("subjectInput")
+    ? document.getElementById("subjectInput").value.trim()
+    : "";
+  return (typeof activeRamo !== "undefined" && activeRamo) ? activeRamo : (inputFallback || "");
+}
+
+function updateCurrentSubjectBadge() {
+  const box = document.getElementById("currentSubjectBox");
+  const label = document.getElementById("currentSubject");
+  if (!box || !label) return;
+
+  const subj = getDisplayedSubject();
+  if (subj) {
+    label.textContent = subj;
+    box.classList.remove("hidden");
+  } else {
+    box.classList.add("hidden");
+  }
+}
+
+// Llamar al cargar
+updateCurrentSubjectBadge();
+
+// Si mantienes el input visible, refleja cambios al tipear/Enter
+const subjInputEl = document.getElementById("subjectInput");
+if (subjInputEl) {
+  subjInputEl.addEventListener("input", updateCurrentSubjectBadge);
+  subjInputEl.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") setTimeout(updateCurrentSubjectBadge, 0);
+  });
+}
+
+// Integra con tu navegación
+const _volverAlPomodoro = volverAlPomodoro;
+volverAlPomodoro = function() {
+  _volverAlPomodoro();
+  updateCurrentSubjectBadge();
+};
+
+// (Si usas showOnly) refresca cuando vuelvas al pomodoro
+const _showOnly = typeof showOnly === "function" ? showOnly : null;
+if (_showOnly) {
+  showOnly = function(id) {
+    _showOnly(id);
+    if (id === "pomodoroView") updateCurrentSubjectBadge();
+  };
+}
+
+// ===== Integración con ventana "Ramos" =====
+// Después de seleccionar/eliminar un ramo en renderRamos(), llama:
+function onRamoChanged() { updateCurrentSubjectBadge(); cargarMetas();}
+
+// En tu renderRamos(), cuando seleccionas activo:
+    // ...
+    // li.onclick = () => {
+    //   activeRamo = ramo;
+    //   localStorage.setItem(ACTIVE_RAMOS_KEY, ramo);
+    //   renderRamos();
+    //   onRamoChanged(); // <-- agrega esta línea
+    // };
+
+// Y cuando eliminas un ramo:
+    // ...
+    // if (activeRamo === ramo) {
+    //   activeRamo = "";
+    //   localStorage.removeItem(ACTIVE_RAMOS_KEY);
+    // }
+    // renderRamos();
+    // onRamoChanged(); // <-- agrega esta línea
+
+// ===== (Opcional recomendado) exigir ramo antes de iniciar =====
+const _startTimer = startTimer;
+startTimer = function() {
+  // Si no hay sujeto elegido, corta
+  if (!getDisplayedSubject()) {
+    alert("Selecciona un ramo (📚 Ramos) o escribe uno antes de iniciar 🍅");
+    return;
+  }
+  _startTimer();
+};

@@ -1,19 +1,26 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Abrir Pomodoro</title>
+  <title>Launcher Pomodoro</title>
 </head>
 <body>
-  <button onclick="abrirPomodoro()">Abrir Pomodoro</button>
+  <h1>Controlador del Pomodoro 🍅</h1>
+  <button onclick="abrirPomodoro()">Abrir ventana flotante</button>
 
   <script>
+    let pomodoroWindow;
+
     function abrirPomodoro() {
-      window.open(
-        "index.html",                  // tu app pomodoro
-        "Pomodoro",
-        "width=600,height=600,resizable=no"
-      );
+      if (!pomodoroWindow || pomodoroWindow.closed) {
+        pomodoroWindow = window.open(
+          "index.html",
+          "PomodoroFlotante",
+          "width=460,height=1000px,left=100,top=100,resizable=no"
+        );
+      } else {
+        pomodoroWindow.focus();
+      }
     }
   </script>
 </body>
